@@ -1,0 +1,230 @@
+﻿@model  IEnumerable<Avionko.Models.LowCostFlight>
+
+@{
+    ViewBag.Title = "Avionko";
+}
+
+<!-- overriding bootstrap :-->
+@section Styles {
+    <link href="~/Content/general.css" rel="stylesheet" type="text/css" />
+}
+
+
+<!-- Intro Header -->
+<header class="intro">
+    <div class="intro-body">
+        <div class="container">
+
+            <div class="row" >
+                <h1 class="brand-heading">Avionko</h1>
+                <p class="intro-text">
+                    Pretraga jeftinih letova nikad prije nije bila jednostavnija!
+                    <br>Razvio GTadeon za KING ICT task.
+                </p>
+            </div>
+
+            <div class="row" >
+                <!-- Form for query -->
+                <form id="lowCostTicketsForm"  onsubmit="return ValidateAirTicketForm()"  method="post" action="@Url.Action("SearchLowCostFlights", "Home")">
+                    <div class="row">
+                        <div class="form-group col-xs-2 ">
+                            <input type="text" class="form-control" id="airport1"  name="airport1" placeholder="Polazni aerodrom" required>
+                        </div>
+                        <div class="form-group col-xs-2">
+                            <input type="text" class="form-control" id="airport2" name="airport2" placeholder="Odredišni aerodrom" required>
+                        </div>
+
+                        <div class="form-group col-xs-2">
+                            <input type="text" name="daterange" id="config-demo" class="form-control">
+                        </div>
+
+                        <div class="form-group col-xs-2">
+                            <select class="form-control airplaneFormDropdown" id="passengerNumber"  name="passengerNumber" type="number" required>
+                                <option>broj putnika</option>
+                                <option>1</option>
+                                <option>2</option>
+                                <option>3</option>
+                                <option>4</option>
+                                <option>5</option>
+                                <option>6</option>
+                                <option>7</option>
+                                <option>8</option>
+                                <option>9</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-xs-2">
+                            <select class="form-control airplaneFormDropdown" id="currency" name="currency" required>
+                                <option>valuta</option>
+                                <option>HRK</option>
+                                <option>EUR</option>
+                                <option>USD</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group col-xs-2">
+                            <button id="ticketSubmitBtn" type="submit" class="btn button-form btn-md"> Pretraži </button>
+                        </div>
+
+                    </div>
+                </form>
+                <p id="validationFailedTxt" style="color:red;"></p>
+            </div>
+
+            <div class="row" ">
+                <a  class="btn button-circle-form page-scroll" href="#about">
+                    <i class="fa fa-angle-double-down animated"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+<!--we're displaying search result section only if we're allowed to-->
+
+
+@if (ViewBag.shouldDisplaySearchResultsDiv == "true")
+{
+    <!-- Search results section -->
+    <section id="searchResults" class="container content-section text-center">
+        <div class="row">
+
+            <!--Checking if we have any results at all, and only then proceeding -->
+            @if (Model.ToList() != null && Model.ToList().Count > 0)
+            {
+                <!--e.g. Zagreb - Beograd -->
+                <h2>Rezultati pretrage @Model.ToList()[0].Airport1 - @Model.ToList()[0].Airport2 </h2>
+
+                <table class="table table-bordered table-inverse" style="color:white;">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Polazni aerodrom</th>
+                            <th>Odredišni aerodrom</th>
+                            <th>polazak-dolazak</th>
+                            <th>broj presjedanja (letova)</th>
+                            <th>broj putnika</th>
+                            <th>ukupna cijena</th>
+                            <th>valuta</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @{ var lineCounter = 0; }
+
+                        @for (int i = 0; i <= Model.ToList().Count - 1; i++)
+                        {
+                            if (lineCounter >= 30) {
+                                    //we don't wanna show more than 30 results per page, cuz it would be too much in my opinion.
+                                    break;
+                                }
+                                
+                            lineCounter+= 1;
+                            <tr>
+                                <th scope="row">@lineCounter</th>
+                                <td>@Model.ToList()[@i].Airport1 </td>
+                                <td>@Model.ToList()[@i].Airport2</td>
+                                <td>@Model.ToList()[@i].DateDeparture - @Model.ToList()[@i].DateReturn</td>
+                                <td>@Model.ToList()[@i].TransferFlightsNumber</td>
+                                <td>@Model.ToList()[@i].PassengerNumber</td>
+                                <td>@Model.ToList()[@i].TotalCost</td>
+                                <td>@Model.ToList()[@i].Currency</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <h2>Za dani unos nije ništa pronađeno, sry :(</h2>
+                <table class="table table-bordered table-inverse" style="color:white;">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Polazni aerodrom</th>
+                            <th>Odredišni aerodrom</th>
+                            <th>polazak-dolazak</th>
+                            <th>broj presjedanja (letova)</th>
+                            <th>broj putnika</th>
+                            <th>cijena</th>
+                            <th>valuta</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">-</th>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                            <td>-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            }
+
+
+        </div>
+        <div class="row">
+            <button type="button" class="btn button-form btn-md" onclick="scrollToTop(); HideSearchResultDiv(); ">Nova pretraga</button>
+        </div>
+    </section>
+}
+
+
+
+<!-- About Section -->
+<section id="about" class="container content-section text-center">
+    <div class="row">
+        <div class="col-lg-8 col-lg-offset-2">
+            <h2>O Avionku</h2>
+            <p>Avionko je besplatna web aplikacija koja će promjeniti vaš pogled na pretragu cijena avio letova. {ubaci ostale "mi smo najbolji bla bla bla" klišeje ovdje} </p>
+            <p>Aplikaciju je razvio Ivan Grobenski za potrebe <a href="http://www.king-ict.hr/">KING ICT</a> testnog taska.</p>
+            <p>Omogućava laku pretragu jeftinijih cijena avionskih letova putem Amadeus API-a i IATA šifri aerodroma.</p>
+        </div>
+    </div>
+</section>
+<!-- Download Section -->
+<section id="download" class="content-section text-center">
+    <div class="download-section">
+        <div class="container">
+            <div class="col-lg-8 col-lg-offset-2">
+                <h2>
+                    Ostale usluge<h2>
+                        <p>Avio cijene, kao kompanija izmišljena za potrebe ovog testnog taska, nudi i neke ostale usluge prijevoza (psst, volimo bicikle).</p>
+                        <a href="http://mtb-shop.hr/" class="btn btn-default btn-lg">Ostali prijevozi</a>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Contact Section -->
+<section id="contact" class="container content-section text-center">
+    <div class="row">
+        <div class="col-lg-8 col-lg-offset-2">
+            <h2>Kontaktirajte nas!</h2>
+            <p>Uočili ste da neke cijene letova ne odgovaraju njihovom stvarnom stanju? Mislite da širimo dezinformacije? Javite nam se!</p>
+            <p>
+                <a href="mailto:igrobenski@gmail.com">igrobenski@gmail.com</a>
+            </p>
+            <ul class="list-inline banner-social-buttons">
+                <li>
+                    <a href="" class="btn btn-default btn-lg"><i class="fa fa-twitter fa-fw"></i> <span class="network-name">Twitter</span></a>
+                </li>
+                <li>
+                    <a href="https://github.com/GTadeon" class="btn btn-default btn-lg"><i class="fa fa-github fa-fw"></i> <span class="network-name">Github</span></a>
+                </li>
+                <li>
+                    <a href="" class="btn btn-default btn-lg"><i class="fa fa-google-plus fa-fw"></i> <span class="network-name">Google+</span></a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+
+
+
+
+
